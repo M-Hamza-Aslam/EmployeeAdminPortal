@@ -12,5 +12,11 @@
 
         public required decimal Salary { get; set; }
 
+        // Foreign Key to Office
+        public int OfficeId { get; set; }
+
+        // Navigation Property
+        public Office Office { get; set; } = null!;
+
     }
 }
