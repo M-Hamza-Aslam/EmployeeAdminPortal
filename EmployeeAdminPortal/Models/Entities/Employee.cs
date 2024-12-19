@@ -15,7 +15,7 @@
         // Foreign Key to Office
         public int OfficeId { get; set; }
 
-        // Navigation Property
+        // Navigation Property: reference navigation to principal
         public Office Office { get; set; } = null!;
 
     }

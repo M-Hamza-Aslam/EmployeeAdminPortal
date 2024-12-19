@@ -18,8 +18,9 @@ namespace EmployeeAdminPortal.Data
             // Configure one-to-many relationship
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.Office) // Employee has one Office
-                .WithMany() // Office has many Employees
-                .HasForeignKey(e => e.OfficeId); // Foreign key
+                .WithMany(o=>o.Employees) // Office has many Employees
+                .HasForeignKey(e => e.OfficeId) // Foreign key
+                .IsRequired();
 
             base.OnModelCreating(modelBuilder);
         }
