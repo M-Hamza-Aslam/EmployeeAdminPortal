@@ -4,6 +4,8 @@ using EmployeeAdminPortal.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EmployeeAdminPortal.Controllers
 {
@@ -13,17 +15,52 @@ namespace EmployeeAdminPortal.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
 
+        private static Expression<Func<Employee, object>> GetSortExpression(string? sortField)
+        {
+            return sortField?.ToLower() switch
+            {
+                "email" => e => e.Email,
+                "salary" => e => e.Salary,
+                _ => e => e.Name // Default to Name
+            };
+        }
+
         public EmployeesController(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
 
-        [HttpGet]
-        public IActionResult GetAllEmployees()
+        [HttpGet("find")]
+        public IActionResult GetAllEmployees(
+            string? searchText,
+            string? sortField = "Name",
+            string? sortOrder = "asc",
+            int pageNumber = 1,
+            int pageSize = 10
+            )
         {
-            var allEmployees = _dbContext.Employees
-                .Include(e => e.Office)
+            var allEmployeesQuery = _dbContext.Employees
+                .Include(e => e.Office).AsQueryable();
+            
+            //searching
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                allEmployeesQuery = allEmployeesQuery.Where(e => e.Name.Contains(searchText) || e.Email.Contains(searchText) || e.Salary.ToString().Contains(searchText));
+            }
+
+            
+            // Sorting
+            allEmployeesQuery = sortOrder?.ToLower() == "desc"
+            ? allEmployeesQuery.OrderByDescending(GetSortExpression(sortField))
+                : allEmployeesQuery.OrderBy(GetSortExpression(sortField));
+
+            // Paging
+            var totalRecords = allEmployeesQuery.Count();
+
+            var employees = allEmployeesQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(e => new 
                 {
                     e.Id,
@@ -41,9 +78,13 @@ namespace EmployeeAdminPortal.Controllers
                 })
                 .ToList();
 
-            Console.WriteLine(allEmployees);
-
-            return Ok(allEmployees);
+            return Ok(new
+            {
+                TotalRecords = totalRecords,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Data = employees
+            });
         }
 
 
