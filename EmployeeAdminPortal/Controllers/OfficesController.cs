@@ -3,6 +3,7 @@ using EmployeeAdminPortal.Models;
 using EmployeeAdminPortal.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeAdminPortal.Controllers
 {
@@ -21,7 +22,25 @@ namespace EmployeeAdminPortal.Controllers
         public IActionResult getAllOffices()
         {
 
-            var offices = _dbContext.Offices.ToList();
+            var offices = _dbContext.Offices
+                .Include(o => o.Employees)
+                .Select(o => new
+                {
+                 o.Id,
+                 o.Name,
+                 o.City,
+                 o.Country,
+                 o.Phone,
+                 Employees = o.Employees.Select(e => new
+                 {
+                     e.Id,
+                     e.Name,
+                     e.Email,
+                     e.phone,
+                     e.Salary}
+                 )
+                })
+                .ToList();
             return Ok(offices);
         }
 
@@ -29,7 +48,27 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id}")]
         public IActionResult getOfficeById(int id)
         {
-            var office = _dbContext.Offices.Find(id);
+            var office = _dbContext.Offices
+                .Include(o => o.Employees)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.Name,
+                    o.City,
+                    o.Country,
+                    o.Phone,
+                    Employees = o.Employees.Select(e => new
+                    {
+                        e.Id,
+                        e.Name,
+                        e.Email,
+                        e.phone,
+                        e.Salary
+                    }
+                 )
+                })
+                .FirstOrDefault(o => o.Id == id);
+
             if (office is null)
             {
                 return NotFound();
