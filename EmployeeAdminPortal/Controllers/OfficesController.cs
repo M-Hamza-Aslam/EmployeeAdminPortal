@@ -1,7 +1,6 @@
 ﻿using EmployeeAdminPortal.Data;
-using EmployeeAdminPortal.Models;
+using EmployeeAdminPortal.DTOs.Office;
 using EmployeeAdminPortal.Models.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,18 +25,19 @@ namespace EmployeeAdminPortal.Controllers
                 .Include(o => o.Employees)
                 .Select(o => new
                 {
-                 o.Id,
-                 o.Name,
-                 o.City,
-                 o.Country,
-                 o.Phone,
-                 Employees = o.Employees.Select(e => new
-                 {
-                     e.Id,
-                     e.Name,
-                     e.Email,
-                     e.phone,
-                     e.Salary}
+                    o.Id,
+                    o.Name,
+                    o.City,
+                    o.Country,
+                    o.Phone,
+                    Employees = o.Employees.Select(e => new
+                    {
+                        e.Id,
+                        e.Name,
+                        e.Email,
+                        e.phone,
+                        e.Salary
+                    }
                  )
                 })
                 .ToList();

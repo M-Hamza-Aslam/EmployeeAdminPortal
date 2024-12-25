@@ -1,8 +1,7 @@
-﻿namespace EmployeeAdminPortal.Models
+﻿namespace EmployeeAdminPortal.DTOs.Office
 {
-    public class UpdateOfficeDto
+    public class AddOfficeDto
     {
-        public int Id { get; set; }
         public required string Name { get; set; }
         public required string City { get; set; }
         public required string Country { get; set; }

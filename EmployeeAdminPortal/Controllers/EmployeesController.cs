@@ -1,11 +1,9 @@
 ﻿using EmployeeAdminPortal.Data;
-using EmployeeAdminPortal.Models;
+using EmployeeAdminPortal.DTOs.Employee;
 using EmployeeAdminPortal.Models.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EmployeeAdminPortal.Controllers
 {
@@ -42,14 +40,14 @@ namespace EmployeeAdminPortal.Controllers
         {
             var allEmployeesQuery = _dbContext.Employees
                 .Include(e => e.Office).AsQueryable();
-            
+
             //searching
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 allEmployeesQuery = allEmployeesQuery.Where(e => e.Name.Contains(searchText) || e.Email.Contains(searchText) || e.Salary.ToString().Contains(searchText));
             }
 
-            
+
             // Sorting
             allEmployeesQuery = sortOrder?.ToLower() == "desc"
             ? allEmployeesQuery.OrderByDescending(GetSortExpression(sortField))
@@ -61,7 +59,7 @@ namespace EmployeeAdminPortal.Controllers
             var employees = allEmployeesQuery
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(e => new 
+                .Select(e => new
                 {
                     e.Id,
                     e.Name,

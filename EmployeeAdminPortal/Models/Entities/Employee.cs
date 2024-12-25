@@ -18,5 +18,7 @@
         // Navigation Property: reference navigation to principal
         public Office Office { get; set; } = null!;
 
+        public ICollection<Project> Projects { get; } = new List<Project>();
+
     }
 }

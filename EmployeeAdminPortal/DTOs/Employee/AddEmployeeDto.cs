@@ -1,6 +1,6 @@
-﻿namespace EmployeeAdminPortal.Models
+﻿namespace EmployeeAdminPortal.DTOs.Employee
 {
-    public class UpdateEmployeeDto
+    public class AddEmployeeDto
     {
         public required string Name { get; set; }
 
