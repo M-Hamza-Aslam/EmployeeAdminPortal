@@ -1,6 +1,4 @@
 ﻿using EmployeeAdminPortal.Data;
-using EmployeeAdminPortal.DTOs.Employee;
-using EmployeeAdminPortal.DTOs.Office;
 using EmployeeAdminPortal.DTOs.Project;
 using EmployeeAdminPortal.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -96,13 +94,13 @@ namespace EmployeeAdminPortal.Controllers
                     p.Name,
                     p.Description,
                     Employees = p.Employees.Select(e => new
-                        {
-                            e.Id,
-                            e.Name,
-                            e.Email,
-                            e.phone,
-                            e.Salary
-                        }
+                    {
+                        e.Id,
+                        e.Name,
+                        e.Email,
+                        e.phone,
+                        e.Salary
+                    }
                     )
                 })
                 .FirstOrDefault(p => p.Id == id);
@@ -116,7 +114,7 @@ namespace EmployeeAdminPortal.Controllers
         }
 
         [HttpPost]
-        public IActionResult createProject(AddProjectDto project)
+        public IActionResult CreateProject(AddProjectDto project)
         {
 
             var newProject = new Project()
@@ -125,10 +123,24 @@ namespace EmployeeAdminPortal.Controllers
                 Description = project.Description,
             };
 
+            if (project.EmployeeIds is not null && project.EmployeeIds.Count > 0)
+            {
+                var employees = _dbContext.Employees
+                    .Where(e => project.EmployeeIds.Contains(e.Id))
+                    .ToList();
+
+                if (employees.Count != project.EmployeeIds.Count)
+                {
+                    return BadRequest("Some employees were not found in the database.");
+                }
+
+                newProject.Employees = employees;
+            }
+
             _dbContext.Projects.Add(newProject);
             _dbContext.SaveChanges();
 
-            return Ok(newProject);
+            return Ok();
 
         }
 
