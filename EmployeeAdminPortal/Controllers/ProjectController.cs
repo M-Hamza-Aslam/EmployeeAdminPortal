@@ -140,7 +140,24 @@ namespace EmployeeAdminPortal.Controllers
             _dbContext.Projects.Add(newProject);
             _dbContext.SaveChanges();
 
-            return Ok();
+            var newCreatedProject = new
+            {
+                newProject.Id,
+                newProject.Name,
+                newProject.Description,
+                Employees = newProject.Employees.Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.Email,
+                    e.phone,
+                    e.Salary
+                }
+                )
+            };
+            
+
+            return Ok(newCreatedProject);
 
         }
 
@@ -184,7 +201,24 @@ namespace EmployeeAdminPortal.Controllers
             _dbContext.Projects.Update(project);
             _dbContext.SaveChanges();
 
-            return Ok();
+            var updatedProject = new
+            {
+                project.Id,
+                project.Name,
+                project.Description,
+                Employees = project.Employees.Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.Email,
+                    e.phone,
+                    e.Salary
+                }
+                )
+            };
+            
+
+            return Ok(updatedProject);
         }
 
         [HttpDelete]
