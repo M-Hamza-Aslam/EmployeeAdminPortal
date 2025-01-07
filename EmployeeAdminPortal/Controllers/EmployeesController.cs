@@ -1,6 +1,7 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.DTOs.Employee;
 using EmployeeAdminPortal.Models.Entities;
+using EmployeeAdminPortal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -12,6 +13,12 @@ namespace EmployeeAdminPortal.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly EmployeeService employeeService;
+
+        public EmployeesController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
         private static Expression<Func<Employee, object>> GetSortExpression(string? sortField)
         {
@@ -23,12 +30,6 @@ namespace EmployeeAdminPortal.Controllers
             };
         }
 
-        public EmployeesController(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-
         [HttpGet("find")]
         public IActionResult GetAllEmployees(
             string? searchText,
@@ -38,6 +39,9 @@ namespace EmployeeAdminPortal.Controllers
             int pageSize = 10
             )
         {
+            //service
+            //const AllEmployees = employeeService.GetAllEmployeesService();
+
             var allEmployeesQuery = _dbContext.Employees
                 .Include(e => e.Office).AsQueryable();
 
