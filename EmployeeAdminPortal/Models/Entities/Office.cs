@@ -9,6 +9,6 @@
         public string? Phone { get; set; }
 
         // Collection navigation containing dependents
-        public ICollection<Employee> Employees { get; } = new List<Employee>();
+        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

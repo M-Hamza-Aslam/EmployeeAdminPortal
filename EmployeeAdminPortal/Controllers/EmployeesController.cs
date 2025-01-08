@@ -1,10 +1,7 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.DTOs.Employee;
-using EmployeeAdminPortal.Models.Entities;
 using EmployeeAdminPortal.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace EmployeeAdminPortal.Controllers
 {
@@ -12,22 +9,11 @@ namespace EmployeeAdminPortal.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
-        private readonly EmployeeService employeeService;
+        private readonly EmployeeService _employeeService;
 
-        public EmployeesController(ApplicationDbContext dbContext)
+        public EmployeesController(ApplicationDbContext dbContext, EmployeeService employeeService)
         {
-            _dbContext = dbContext;
-        }
-
-        private static Expression<Func<Employee, object>> GetSortExpression(string? sortField)
-        {
-            return sortField?.ToLower() switch
-            {
-                "email" => e => e.Email,
-                "salary" => e => e.Salary,
-                _ => e => e.Name // Default to Name
-            };
+            _employeeService = employeeService;
         }
 
         [HttpGet("find")]
@@ -40,102 +26,28 @@ namespace EmployeeAdminPortal.Controllers
             )
         {
             //service
-            //const AllEmployees = employeeService.GetAllEmployeesService();
+            var AllEmployees = _employeeService.GetAllEmployeesService(searchText, sortField, sortOrder, pageNumber, pageSize);
 
-            var allEmployeesQuery = _dbContext.Employees
-                .Include(e => e.Office).AsQueryable();
-
-            //searching
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                allEmployeesQuery = allEmployeesQuery.Where(e => e.Name.Contains(searchText) || e.Email.Contains(searchText) || e.Salary.ToString().Contains(searchText));
-            }
-
-
-            // Sorting
-            allEmployeesQuery = sortOrder?.ToLower() == "desc"
-            ? allEmployeesQuery.OrderByDescending(GetSortExpression(sortField))
-                : allEmployeesQuery.OrderBy(GetSortExpression(sortField));
-
-            // Paging
-            var totalRecords = allEmployeesQuery.Count();
-
-            var employees = allEmployeesQuery
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => new
-                {
-                    e.Id,
-                    e.Name,
-                    e.Email,
-                    e.phone,
-                    e.Salary,
-                    Office = new
-                    {
-                        e.Office.Id,
-                        e.Office.Name,
-                        e.Office.City,
-                        e.Office.Country
-                    }
-                })
-                .ToList();
-
-            return Ok(new
-            {
-                TotalRecords = totalRecords,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                Data = employees
-            });
+            return Ok(AllEmployees);
         }
-
 
         [HttpGet]
         [Route("{id:guid}")]
         public IActionResult GetEmployeeById(Guid id)
         {
-            var employee = _dbContext.Employees
-                .Include(e => e.Office)
-                .Select(e => new
-                {
-                    e.Id,
-                    e.Name,
-                    e.Email,
-                    e.phone,
-                    e.Salary,
-                    Office = new
-                    {
-                        e.Office.Id,
-                        e.Office.Name,
-                        e.Office.City,
-                        e.Office.Country
-                    }
-                })
-                .FirstOrDefault(e => e.Id == id);
+          var employee = _employeeService.GetEmployeeByIdService(id);
 
             if (employee is null)
             {
                 return NotFound();
             }
-
             return Ok(employee);
         }
-
 
         [HttpPost]
         public IActionResult CreateEmployee(AddEmployeeDto addEmployeeDto)
         {
-            var employeeEntity = new Employee()
-            {
-                Name = addEmployeeDto.Name,
-                Email = addEmployeeDto.Email,
-                phone = addEmployeeDto.phone,
-                Salary = addEmployeeDto.Salary,
-                OfficeId = addEmployeeDto.OfficeId,
-            };
-
-            _dbContext.Employees.Add(employeeEntity);
-            _dbContext.SaveChanges();
+            var employeeEntity = _employeeService.CreateEmployeeService(addEmployeeDto);
 
             return CreatedAtAction("CreateEmployee", employeeEntity);
         }
@@ -145,20 +57,12 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = _dbContext.Employees.Find(id);
+            var employee = _employeeService.UpdateEmployeeService(id, updateEmployeeDto);
+
             if (employee is null)
             {
                 return NotFound();
             }
-
-            employee.Name = updateEmployeeDto.Name;
-            employee.Email = updateEmployeeDto.Email;
-            employee.phone = updateEmployeeDto.phone;
-            employee.Salary = updateEmployeeDto.Salary;
-            employee.OfficeId = updateEmployeeDto.OfficeId;
-
-            _dbContext.Employees.Update(employee);
-            _dbContext.SaveChanges();
 
             return Ok(employee);
         }
@@ -168,15 +72,12 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult DeleteEmployee(Guid id)
         {
-            var employee = _dbContext.Employees.Find(id);
+            var employee = _employeeService.DeleteEmployeeService(id);
 
-            if (employee is null)
+            if (!employee)
             {
                 return NotFound();
             }
-
-            _dbContext.Employees.Remove(employee);
-            _dbContext.SaveChanges();
 
             return NoContent();
         }

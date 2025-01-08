@@ -1,6 +1,7 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.DTOs.Office;
 using EmployeeAdminPortal.Models.Entities;
+using EmployeeAdminPortal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,36 +12,20 @@ namespace EmployeeAdminPortal.Controllers
     public class OfficesController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly OfficeService _officeService;
 
-        public OfficesController(ApplicationDbContext dbContext)
+
+        public OfficesController(ApplicationDbContext dbContext, OfficeService officeService)
         {
             _dbContext = dbContext;
+            _officeService = officeService;
         }
 
         [HttpGet]
         public IActionResult getAllOffices()
         {
 
-            var offices = _dbContext.Offices
-                .Include(o => o.Employees)
-                .Select(o => new
-                {
-                    o.Id,
-                    o.Name,
-                    o.City,
-                    o.Country,
-                    o.Phone,
-                    Employees = o.Employees.Select(e => new
-                    {
-                        e.Id,
-                        e.Name,
-                        e.Email,
-                        e.phone,
-                        e.Salary
-                    }
-                 )
-                })
-                .ToList();
+            var offices = _officeService.GetAllOfficesService();
             return Ok(offices);
         }
 

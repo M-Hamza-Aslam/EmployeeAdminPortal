@@ -12,9 +12,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("HomeConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ArkitektzConnection")));
 
 builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<OfficeService>();
 
 var app = builder.Build();
 
