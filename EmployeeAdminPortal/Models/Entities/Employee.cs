@@ -8,7 +8,7 @@
 
         public required string Email { get; set; }
 
-        public string? phone { get; set; }
+        public string? Phone { get; set; }
 
         public required decimal Salary { get; set; }
 

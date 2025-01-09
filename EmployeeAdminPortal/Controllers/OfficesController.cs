@@ -1,9 +1,7 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.DTOs.Office;
-using EmployeeAdminPortal.Models.Entities;
 using EmployeeAdminPortal.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeAdminPortal.Controllers
 {
@@ -22,37 +20,18 @@ namespace EmployeeAdminPortal.Controllers
         }
 
         [HttpGet]
-        public IActionResult getAllOffices()
+        public IActionResult GetAllOffices()
         {
 
-            var offices = _officeService.GetAllOfficesService();
+            var offices = _officeService.GetAll();
             return Ok(offices);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult getOfficeById(int id)
+        public IActionResult GetOfficeById(int id)
         {
-            var office = _dbContext.Offices
-                .Include(o => o.Employees)
-                .Select(o => new
-                {
-                    o.Id,
-                    o.Name,
-                    o.City,
-                    o.Country,
-                    o.Phone,
-                    Employees = o.Employees.Select(e => new
-                    {
-                        e.Id,
-                        e.Name,
-                        e.Email,
-                        e.phone,
-                        e.Salary
-                    }
-                 )
-                })
-                .FirstOrDefault(o => o.Id == id);
+            var office = _officeService.GetById(id);
 
             if (office is null)
             {
@@ -62,57 +41,42 @@ namespace EmployeeAdminPortal.Controllers
         }
 
         [HttpPost]
-        public IActionResult createOffice(AddOfficeDto office)
+        public IActionResult CreateOffice(AddOfficeDto office)
         {
 
-            var newOffice = new Office()
+            var newOfficeId = _officeService.Create(office);
+
+            if (newOfficeId is null)
             {
-                Name = office.Name,
-                City = office.City,
-                Country = office.Country,
-                Phone = office.Phone,
-            };
+                BadRequest();
+            }
 
-            _dbContext.Offices.Add(newOffice);
-            _dbContext.SaveChanges();
-
-            return Ok(newOffice);
+            return Ok(newOfficeId);
 
         }
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult updateOffice(int id, UpdateOfficeDto office)
+        public IActionResult UpdateOffice(int id, UpdateOfficeDto office)
         {
-            var OfficeEntity = _dbContext.Offices.Find(id);
-            if (OfficeEntity is null)
+            var UpdatedOfficeId = _officeService.Update(id, office);
+            if (UpdatedOfficeId is null)
             {
                 return NotFound();
             }
 
-            OfficeEntity.Name = office.Name;
-            OfficeEntity.City = office.City;
-            OfficeEntity.Country = office.Country;
-            OfficeEntity.Phone = office.Phone;
-
-            _dbContext.Offices.Update(OfficeEntity);
-            _dbContext.SaveChanges();
-
-            return Ok();
+            return Ok(UpdatedOfficeId);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult deleteOffice(int id)
+        public IActionResult DeleteOffice(int id)
         {
-            var office = _dbContext.Offices.Find(id);
+            var office = _officeService.Delete(id);
             if (office is null)
             {
                 return NotFound();
             }
-
-            _dbContext.Offices.Remove(office);
-            _dbContext.SaveChanges();
 
             return Ok();
         }

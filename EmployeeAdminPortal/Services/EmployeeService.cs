@@ -58,7 +58,7 @@ namespace EmployeeAdminPortal.Services
                     Id = e.Id,
                     Name = e.Name,
                     Email = e.Email,
-                    phone = e.phone,
+                    Phone = e.Phone,
                     Salary = e.Salary,
                     Office = new Office
                     {
@@ -88,7 +88,7 @@ namespace EmployeeAdminPortal.Services
                 Id = e.Id,
                 Name = e.Name,
                 Email = e.Email,
-                phone = e.phone,
+                Phone = e.Phone,
                 Salary = e.Salary,
                 Office = new Office
                 {
@@ -103,13 +103,13 @@ namespace EmployeeAdminPortal.Services
             return employee;
         }
 
-        public Employee CreateEmployeeService (AddEmployeeDto addEmployeeDto)
+        public Employee CreateEmployeeService(AddEmployeeDto addEmployeeDto)
         {
             var employeeEntity = new Employee()
             {
                 Name = addEmployeeDto.Name,
                 Email = addEmployeeDto.Email,
-                phone = addEmployeeDto.phone,
+                Phone = addEmployeeDto.phone,
                 Salary = addEmployeeDto.Salary,
                 OfficeId = addEmployeeDto.OfficeId,
             };
@@ -120,7 +120,7 @@ namespace EmployeeAdminPortal.Services
             return employeeEntity;
         }
 
-        public Employee? UpdateEmployeeService (Guid id, UpdateEmployeeDto updateEmployeeDto)
+        public Employee? UpdateEmployeeService(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
             var employee = _dbContext.Employees.Find(id);
             if (employee is null)
@@ -130,7 +130,7 @@ namespace EmployeeAdminPortal.Services
 
             employee.Name = updateEmployeeDto.Name;
             employee.Email = updateEmployeeDto.Email;
-            employee.phone = updateEmployeeDto.phone;
+            employee.Phone = updateEmployeeDto.phone;
             employee.Salary = updateEmployeeDto.Salary;
             employee.OfficeId = updateEmployeeDto.OfficeId;
 
@@ -140,7 +140,7 @@ namespace EmployeeAdminPortal.Services
             return employee;
         }
 
-        public bool DeleteEmployeeService (Guid id)
+        public bool DeleteEmployeeService(Guid id)
         {
             var employee = _dbContext.Employees.Find(id);
 

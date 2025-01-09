@@ -66,7 +66,7 @@ namespace EmployeeAdminPortal.Controllers
                         e.Id,
                         e.Name,
                         e.Email,
-                        e.phone,
+                        e.Phone,
                         e.Salary
                     }
                     )
@@ -98,7 +98,7 @@ namespace EmployeeAdminPortal.Controllers
                         e.Id,
                         e.Name,
                         e.Email,
-                        e.phone,
+                        e.Phone,
                         e.Salary
                     }
                     )
@@ -150,7 +150,7 @@ namespace EmployeeAdminPortal.Controllers
                     e.Id,
                     e.Name,
                     e.Email,
-                    e.phone,
+                    e.Phone,
                     e.Salary
                 }
                 )
@@ -211,7 +211,7 @@ namespace EmployeeAdminPortal.Controllers
                     e.Id,
                     e.Name,
                     e.Email,
-                    e.phone,
+                    e.Phone,
                     e.Salary
                 }
                 )
