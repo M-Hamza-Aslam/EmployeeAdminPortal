@@ -1,4 +1,5 @@
 using EmployeeAdminPortal.Data;
+using EmployeeAdminPortal.Repositories;
 using EmployeeAdminPortal.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +15,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ArkitektzConnection")));
 
+//services
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<OfficeService>();
+
+//repositories
+builder.Services.AddScoped<EmployeeRepo>();
 
 var app = builder.Build();
 

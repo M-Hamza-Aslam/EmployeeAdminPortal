@@ -1,9 +1,9 @@
 ﻿using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Dtos.Common;
+using EmployeeAdminPortal.Dtos.Employee;
 using EmployeeAdminPortal.DTOs.Employee;
 using EmployeeAdminPortal.Models.Entities;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+using EmployeeAdminPortal.Repositories;
 
 namespace EmployeeAdminPortal.Services
 {
@@ -11,41 +11,25 @@ namespace EmployeeAdminPortal.Services
     {
         private readonly ApplicationDbContext _dbContext;
 
-        public EmployeeService(ApplicationDbContext dbContext)
+        private readonly EmployeeRepo _employeeRepo;
+
+        public EmployeeService(ApplicationDbContext dbContext, EmployeeRepo employeeRepo)
         {
             _dbContext = dbContext;
-        }
-        private static Expression<Func<Employee, object>> GetSortExpression(string? sortField)
-        {
-            return sortField?.ToLower() switch
-            {
-                "email" => e => e.Email,
-                "salary" => e => e.Salary,
-                _ => e => e.Name // Default to Name
-            };
+            _employeeRepo = employeeRepo;
         }
 
-        public PaginatedResponseDto<Employee> GetAllEmployeesService(
+        public PaginatedResponseDto<EmployeeResponseDto> GetAll(
             string? searchText,
             string? sortField,
             string? sortOrder,
             int pageNumber,
             int pageSize)
         {
-            var allEmployeesQuery = _dbContext.Employees
-           .Include(e => e.Office).AsQueryable();
-
-            //searching
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                allEmployeesQuery = allEmployeesQuery.Where(e => e.Name.Contains(searchText) || e.Email.Contains(searchText) || e.Salary.ToString().Contains(searchText));
-            }
-
-
-            // Sorting
-            allEmployeesQuery = sortOrder?.ToLower() == "desc"
-            ? allEmployeesQuery.OrderByDescending(GetSortExpression(sortField))
-                : allEmployeesQuery.OrderBy(GetSortExpression(sortField));
+            var allEmployeesQuery = _employeeRepo.GetAll(
+                searchText,
+                sortField,
+                sortOrder);
 
             // Paging
             var totalRecords = allEmployeesQuery.Count();
@@ -53,24 +37,30 @@ namespace EmployeeAdminPortal.Services
             var employees = allEmployeesQuery
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(e => new Employee
+                .Select(e => new EmployeeResponseDto
                 {
                     Id = e.Id,
                     Name = e.Name,
                     Email = e.Email,
                     Phone = e.Phone,
                     Salary = e.Salary,
-                    Office = new Office
+                    Office = new EmployeeOfficeDto
                     {
                         Id = e.Office.Id,
                         Name = e.Office.Name,
                         City = e.Office.City,
                         Country = e.Office.Country
-                    }
+                    },
+                    Projects = e.Projects.Select(p => new EmployeeProjectDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                    }).ToList()
                 })
                 .ToList();
 
-            return new PaginatedResponseDto<Employee>
+            return new PaginatedResponseDto<EmployeeResponseDto>
             {
                 PageSize = pageSize,
                 PageNumber = pageNumber,
@@ -79,31 +69,36 @@ namespace EmployeeAdminPortal.Services
             };
         }
 
-        public Employee? GetEmployeeByIdService(Guid id)
+        public EmployeeResponseDto? GetById(Guid id)
         {
-            var employee = _dbContext.Employees
-            .Include(e => e.Office)
-            .Select(e => new Employee
-            {
-                Id = e.Id,
-                Name = e.Name,
-                Email = e.Email,
-                Phone = e.Phone,
-                Salary = e.Salary,
-                Office = new Office
-                {
-                    Id = e.Office.Id,
-                    Name = e.Office.Name,
-                    City = e.Office.City,
-                    Country = e.Office.Country
-                }
-            })
-            .FirstOrDefault(e => e.Id == id);
+            var employee = _employeeRepo.GetById(id);
 
-            return employee;
+            if (employee is null) return null;
+
+            return new EmployeeResponseDto
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Email = employee.Email,
+                Phone = employee.Phone,
+                Salary = employee.Salary,
+                Office = new EmployeeOfficeDto
+                {
+                    Id = employee.Office.Id,
+                    Name = employee.Office.Name,
+                    City = employee.Office.City,
+                    Country = employee.Office.Country
+                },
+                Projects = employee.Projects.Select(p => new EmployeeProjectDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                }).ToList()
+            };
         }
 
-        public Employee CreateEmployeeService(AddEmployeeDto addEmployeeDto)
+        public Guid? Create(AddEmployeeDto addEmployeeDto)
         {
             var employeeEntity = new Employee()
             {
@@ -114,15 +109,15 @@ namespace EmployeeAdminPortal.Services
                 OfficeId = addEmployeeDto.OfficeId,
             };
 
-            _dbContext.Employees.Add(employeeEntity);
-            _dbContext.SaveChanges();
+            var employeeId = _employeeRepo.Create(employeeEntity);
 
-            return employeeEntity;
+            return employeeId;
         }
 
-        public Employee? UpdateEmployeeService(Guid id, UpdateEmployeeDto updateEmployeeDto)
+        public Guid? Update(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = _dbContext.Employees.Find(id);
+            var employee = _employeeRepo.GetById(id);
+
             if (employee is null)
             {
                 return null;
@@ -134,25 +129,23 @@ namespace EmployeeAdminPortal.Services
             employee.Salary = updateEmployeeDto.Salary;
             employee.OfficeId = updateEmployeeDto.OfficeId;
 
-            _dbContext.Employees.Update(employee);
-            _dbContext.SaveChanges();
+            var employeeId = _employeeRepo.Update(employee);
 
-            return employee;
+            return employeeId;
         }
 
-        public bool DeleteEmployeeService(Guid id)
+        public Guid? DeleteEmployeeService(Guid id)
         {
-            var employee = _dbContext.Employees.Find(id);
+            var employee = _employeeRepo.GetById(id);
 
             if (employee is null)
             {
-                return false;
+                return null;
             }
 
-            _dbContext.Employees.Remove(employee);
-            _dbContext.SaveChanges();
+            var employeeId = _employeeRepo.Remove(employee);
 
-            return true;
+            return employeeId;
         }
 
     }

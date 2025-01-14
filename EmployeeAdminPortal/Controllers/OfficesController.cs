@@ -9,13 +9,10 @@ namespace EmployeeAdminPortal.Controllers
     [ApiController]
     public class OfficesController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
         private readonly OfficeService _officeService;
-
 
         public OfficesController(ApplicationDbContext dbContext, OfficeService officeService)
         {
-            _dbContext = dbContext;
             _officeService = officeService;
         }
 
@@ -48,7 +45,7 @@ namespace EmployeeAdminPortal.Controllers
 
             if (newOfficeId is null)
             {
-                BadRequest();
+                return BadRequest();
             }
 
             return Ok(newOfficeId);

@@ -26,7 +26,7 @@ namespace EmployeeAdminPortal.Controllers
             )
         {
             //service
-            var AllEmployees = _employeeService.GetAllEmployeesService(searchText, sortField, sortOrder, pageNumber, pageSize);
+            var AllEmployees = _employeeService.GetAll(searchText, sortField, sortOrder, pageNumber, pageSize);
 
             return Ok(AllEmployees);
         }
@@ -35,7 +35,7 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult GetEmployeeById(Guid id)
         {
-          var employee = _employeeService.GetEmployeeByIdService(id);
+            var employee = _employeeService.GetById(id);
 
             if (employee is null)
             {
@@ -47,9 +47,15 @@ namespace EmployeeAdminPortal.Controllers
         [HttpPost]
         public IActionResult CreateEmployee(AddEmployeeDto addEmployeeDto)
         {
-            var employeeEntity = _employeeService.CreateEmployeeService(addEmployeeDto);
+            var newEmployeeId = _employeeService.Create(addEmployeeDto);
 
-            return CreatedAtAction("CreateEmployee", employeeEntity);
+            if (newEmployeeId is null)
+            {
+                return BadRequest();
+            }
+
+
+            return CreatedAtAction("CreateEmployee", newEmployeeId);
         }
 
 
@@ -57,14 +63,14 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = _employeeService.UpdateEmployeeService(id, updateEmployeeDto);
+            var employeeId = _employeeService.Update(id, updateEmployeeDto);
 
-            if (employee is null)
+            if (employeeId is null)
             {
                 return NotFound();
             }
 
-            return Ok(employee);
+            return Ok(employeeId);
         }
 
 
@@ -72,14 +78,14 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult DeleteEmployee(Guid id)
         {
-            var employee = _employeeService.DeleteEmployeeService(id);
+            var employeeId = _employeeService.DeleteEmployeeService(id);
 
-            if (!employee)
+            if (employeeId is null)
             {
                 return NotFound();
             }
 
-            return NoContent();
+            return Ok(employeeId);
         }
     }
 }

@@ -9,6 +9,7 @@
         public string? phone { get; set; }
 
         public required decimal Salary { get; set; }
+
         public required int OfficeId { get; set; }
 
     }
