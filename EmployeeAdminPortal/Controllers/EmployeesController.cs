@@ -24,6 +24,7 @@ namespace EmployeeAdminPortal.Controllers
             int pageNumber = 1,
             int pageSize = 10
             )
+
         {
             //service
             var AllEmployees = _employeeService.GetAll(searchText, sortField, sortOrder, pageNumber, pageSize);
@@ -47,6 +48,11 @@ namespace EmployeeAdminPortal.Controllers
         [HttpPost]
         public IActionResult CreateEmployee(AddEmployeeDto addEmployeeDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var newEmployeeId = _employeeService.Create(addEmployeeDto);
 
             if (newEmployeeId is null)
@@ -63,6 +69,11 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var employeeId = _employeeService.Update(id, updateEmployeeDto);
 
             if (employeeId is null)

@@ -1,6 +1,9 @@
 using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Repositories;
 using EmployeeAdminPortal.Services;
+using EmployeeAdminPortal.Validators.Employee;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +24,12 @@ builder.Services.AddScoped<OfficeService>();
 
 //repositories
 builder.Services.AddScoped<EmployeeRepo>();
+
+//fluent validator
+builder.Services.AddFluentValidationAutoValidation(options =>
+{
+    options.DisableDataAnnotationsValidation = true;
+}).AddValidatorsFromAssemblyContaining<AddEmployeeDtoValidator>();
 
 var app = builder.Build();
 

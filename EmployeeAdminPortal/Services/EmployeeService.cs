@@ -104,7 +104,7 @@ namespace EmployeeAdminPortal.Services
             {
                 Name = addEmployeeDto.Name,
                 Email = addEmployeeDto.Email,
-                Phone = addEmployeeDto.phone,
+                Phone = addEmployeeDto.Phone,
                 Salary = addEmployeeDto.Salary,
                 OfficeId = addEmployeeDto.OfficeId,
             };
