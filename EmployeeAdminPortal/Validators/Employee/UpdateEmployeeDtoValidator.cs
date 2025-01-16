@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace EmployeeAdminPortal.Validators.Employee
 {
-    public class UpdateEmployeeDtoValidator : AbstractValidator<AddEmployeeDto>
+    public class UpdateEmployeeDtoValidator : AbstractValidator<UpdateEmployeeDto>
     {
         public UpdateEmployeeDtoValidator()
         {

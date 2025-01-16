@@ -125,7 +125,7 @@ namespace EmployeeAdminPortal.Services
 
             employee.Name = updateEmployeeDto.Name;
             employee.Email = updateEmployeeDto.Email;
-            employee.Phone = updateEmployeeDto.phone;
+            employee.Phone = updateEmployeeDto.Phone;
             employee.Salary = updateEmployeeDto.Salary;
             employee.OfficeId = updateEmployeeDto.OfficeId;
 

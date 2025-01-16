@@ -1,4 +1,5 @@
 ﻿using EmployeeAdminPortal.Data;
+using EmployeeAdminPortal.Dtos.Common;
 using EmployeeAdminPortal.DTOs.Employee;
 using EmployeeAdminPortal.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +18,16 @@ namespace EmployeeAdminPortal.Controllers
         }
 
         [HttpGet("find")]
-        public IActionResult GetAllEmployees(
-            string? searchText,
-            string? sortField = "Name",
-            string? sortOrder = "asc",
-            int pageNumber = 1,
-            int pageSize = 10
-            )
+        public IActionResult GetAllEmployees([FromQuery] PaginatedRequestDto Inputs)
 
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             //service
-            var AllEmployees = _employeeService.GetAll(searchText, sortField, sortOrder, pageNumber, pageSize);
+            var AllEmployees = _employeeService.GetAll(Inputs.SearchText, Inputs.SortField, Inputs.SortOrder, Inputs.PageNumber, Inputs.PageSize);
 
             return Ok(AllEmployees);
         }
